@@ -32,7 +32,7 @@ class Line(Element):
 
         if sum2 > sum1:
             return 1
-        elif sum1 == sum2:
+        elif obj1.get_a() == obj2.get_a() and obj1.get_b() == obj2.get_b() and obj1.get_c() == obj2.get_c():
             return 0
         else:
             return -1

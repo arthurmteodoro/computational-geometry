@@ -25,7 +25,7 @@ class Point(Element):
 
         if obj2 > obj1:
             return 1
-        elif obj2 == obj1:
+        elif obj1.get_x() == obj2.get_x() and obj1.get_y() == obj2.get_y():
             return 0
         else:
             return -1

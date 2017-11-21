@@ -22,7 +22,7 @@ class Circle(Element):
     def comparable(obj1, obj2):
         if obj2.get_radius() > obj1.get_radius():
             return 1
-        elif obj1.get_radius() == obj2.get_radius():
+        elif obj1.get_radius() == obj2.get_radius() and obj1.get_centre() == obj2.get_centre():
             return 0
         else:
             return -1
