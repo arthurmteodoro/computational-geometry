@@ -11,6 +11,7 @@ class BinTree(object):
     def __init__(self):
         self.__root = None
         self.__isOrder = False
+        self.__len = 0
 
     @staticmethod
     def __get_height(root):
@@ -61,8 +62,10 @@ class BinTree(object):
 
         if func(value, root.value) < 0:
             root.left = BinTree.__insert_with_function(root.left, value, func)
-        else:
+        elif func(value, root.value) > 0:
             root.right = BinTree.__insert_with_function(root.right, value, func)
+        else:
+            return root
 
         root.height = 1 + max(BinTree.__get_height(root.left), BinTree.__get_height(root.right))
 
@@ -105,12 +108,14 @@ class BinTree(object):
         return root
 
     def insert(self, value, func=None):
-        if func is not None:
-            self.__root = BinTree.__insert_with_function(self.__root, value, func)
-            self.__isOrder = True
-        else:
-            self.__root = BinTree.__insert_without_function(self.__root, value)
-            self.__isOrder = False
+        if self.search(value, func) is None:
+            if func is not None:
+                self.__root = BinTree.__insert_with_function(self.__root, value, func)
+                self.__isOrder = True
+            else:
+                self.__root = BinTree.__insert_without_function(self.__root, value)
+                self.__isOrder = False
+            self.__len += 1
 
     @staticmethod
     def __search_in_avl(root, value, func):
@@ -254,6 +259,16 @@ class BinTree(object):
                 self.__root = BinTree.__delete_in_binary_tree(self.__root, value, func)
         else:
             self.__root = BinTree.__delete_without_function(self.__root, value)
+        self.__len -= 1
+
+    def get_root(self):
+        return self.__root
+
+    def get_is_order(self):
+        return self.__isOrder
+
+    def get_len(self):
+        return self.__len
 
 
 def comp(n1, n2):
@@ -273,8 +288,8 @@ if __name__ == '__main__':
         tree.insert(i)
         tree2.insert(i, comp)
 
-    print tree2.search(3, comp).value
-    print tree.search(5, comp).value
+    print(tree2.search(3, comp).value)
+    print(tree.search(5, comp).value)
 
     tree2.delete(3, comp)
     tree.delete(1, comp)
