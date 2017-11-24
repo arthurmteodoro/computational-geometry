@@ -83,6 +83,12 @@ class Set:
         Set.__add_difference(self.__binTree.get_root(), b, new_set)
         return new_set
 
+    def __len__(self):
+        return len(self.__binTree)
+
+    def get_iterator(self):
+        return self.__binTree.get_root()
+
 
 if __name__ == '__main__':
     set1 = Set()
@@ -92,6 +98,8 @@ if __name__ == '__main__':
     p2 = Point(3, 4)
     p3 = Point(5, 6)
     p4 = Point(7, 8)
+
+    p1_copy = Point(1, 2)
 
     set1.insert(p1)
     set1.insert(p2)
@@ -103,4 +111,23 @@ if __name__ == '__main__':
     set3 = set1.union(set2)
     set4 = set1.intersection(set2)
     set5 = set1.difference(set2)
+
+    if set1.member(p1_copy):
+        print('Funcionou com valores iguais em objetos diferentes')
+    else:
+        print('Deu ruim valores iguais em objetos diferentes')
+
+    print(len(set1))
     print("asdasd")
+
+    set6 = Set()
+
+    set6.insert(set1)
+    set6.insert(set2)
+
+    set7 = set6.find(p4)
+
+    if set7 is not None:
+        print('ae carai')
+    else:
+        print('vai tomar no cu porra')

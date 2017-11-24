@@ -15,7 +15,7 @@ class Circle(Element):
     def set_centre(self, centre):
         self.__centre = centre
 
-    def set__radius(self, radius):
+    def set_radius(self, radius):
         self.__radius = radius
 
     @staticmethod

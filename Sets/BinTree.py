@@ -6,11 +6,18 @@ class Node(object):
         self.insertInLeft = True
         self.height = 0
 
+    def __iter__(self):
+        if self.left:
+            yield from self.left
+        yield self.value
+        if self.right:
+            yield from self.right
+
 
 class BinTree(object):
     def __init__(self):
         self.__root = None
-        self.__isOrder = False
+        self.__isOrder = True
         self.__len = 0
 
     @staticmethod
@@ -267,7 +274,7 @@ class BinTree(object):
     def get_is_order(self):
         return self.__isOrder
 
-    def get_len(self):
+    def __len__(self):
         return self.__len
 
 
@@ -287,6 +294,11 @@ if __name__ == '__main__':
     for i in range(0, 8):
         tree.insert(i)
         tree2.insert(i, comp)
+
+    for i in tree2.get_root():
+        print(i.value, end=' ')
+
+    print()
 
     print(tree2.search(3, comp).value)
     print(tree.search(5, comp).value)

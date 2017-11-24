@@ -20,10 +20,10 @@ class Point(Element):
 
     @staticmethod
     def comparable(obj1, obj2):
-        obj1 = obj1.get_x() + obj1.get_y()
-        obj2 = obj2.get_x() + obj2.get_y()
+        obj1_sum = obj1.get_x() + obj1.get_y()
+        obj2_sum = obj2.get_x() + obj2.get_y()
 
-        if obj2 > obj1:
+        if obj2_sum > obj1_sum:
             return 1
         elif obj1.get_x() == obj2.get_x() and obj1.get_y() == obj2.get_y():
             return 0
