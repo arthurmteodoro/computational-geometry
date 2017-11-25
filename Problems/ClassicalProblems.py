@@ -26,6 +26,44 @@ def area_of_a_circle(c: Circle):
     return math.pi * pow(c.get_radius(), 2)
 
 
+def polygon_sort(poly: Polygon):
+    corners = poly.get_list_points()
+    n = len(corners)
+    cx = 0
+    cy = 0
+
+    for i in corners:
+        cx += i.get_x()
+        cy += i.get_y()
+
+    cx = cx / float(n)
+    cy = cy / float(n)
+
+    corners_with_angles = []
+    for i in corners:
+        dx = i.get_x() - cx
+        dy = i.get_y() - cy
+        an = (math.atan2(dy, dx) + 2.0 * math.pi) % (2.0 * math.pi)
+        corners_with_angles.append((dx, dy, an))
+
+    corners_with_angles.sort(key=lambda tup: tup[2])
+    return corners_with_angles
+
+
+def polygon_area(poly: Polygon):
+    corners = polygon_sort(poly)
+    n = len(corners)
+    area = 0.0
+
+    for i in range(n):
+        j = (i + 1) % n
+        area += corners[i][0] * corners[j][1]
+        area -= corners[j][0] * corners[i][1]
+    area = abs(area) / 2.0
+
+    return area
+
+
 def convex_polygon(poly: Polygon):
     if len(poly.get_list_points()) < 3:
         return False
@@ -123,16 +161,16 @@ def closest_point(seg: LineSegment, points: Set):
 
 
 def orient_2d(a: Point, b: Point, c: Point):
-    first = (b.get_x() - a.get_x()) * (c.get_y() - b.get_y())
-    second = (c.get_x() - b.get_x()) * (b.get_y() - a.get_y())
+    first = (b.get_y() - a.get_y()) * (c.get_x() - b.get_x())
+    second = (c.get_y() - b.get_y()) * (b.get_x() - a.get_x())
     det = first - second
 
-    if det > 0:
-        return 'left'
-    elif det < 0:
-        return 'right'
+    if det == 0:
+        return 0
+    elif det > 0:
+        return 1
     else:
-        return 'collinear'
+        return -1
 
 
 def __point_in_segment(p: Point, s: LineSegment):
