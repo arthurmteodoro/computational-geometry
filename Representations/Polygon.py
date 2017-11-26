@@ -30,9 +30,27 @@ class Polygon:
     def get_list_points(self):
         return self.__list_points
 
+    def remove_point(self, p: Point):
+        remove_seg = []
+
+        for i in self.__segments.get_iterator():
+            if i.get_a().comparable(i.get_a(), p) == 0 or i.get_b().comparable(i.get_b(), p) == 0:
+                remove_seg.append(i)
+
+        for i in remove_seg:
+            self.__segments.delete(i)
+
+        for i in self.__list_points:
+            if i.get_x() == p.get_x() and i.get_y() == p.get_y():
+                self.__list_points.remove(i)
+                break
+
 
 if __name__ == '__main__':
     p = Polygon()
     p.add_segment(LineSegment(Point(1, 2), Point(2, 3)))
     p.add_segment(LineSegment(Point(2, 3), Point(5, 6)))
     p.add_segment(LineSegment(Point(5, 6), Point(1, 2)))
+
+    p.remove_point(Point(1, 2))
+    print('aaa')
