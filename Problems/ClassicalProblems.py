@@ -7,6 +7,7 @@ from Sets.Set import Set
 import math
 import copy
 
+
 def distance_between_two_points(pa: Point, pb: Point):
     """
     Get a distance between two points
