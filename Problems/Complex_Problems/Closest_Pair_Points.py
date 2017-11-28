@@ -2,7 +2,7 @@ from Problems.ClassicalProblems import distance_between_two_points
 from Representations.Point import Point
 from Utils.Utils import cmp_to_key
 import math
-
+import copy
 
 class Points:
     def __init__(self):
@@ -46,7 +46,7 @@ class ClosestPair:
     def strip_closest(strip: list, size: int, d: float, points: Points):
         min_value = d
 
-        strip.sort(key=cmp_to_key(ClosestPair.compare_y))
+        # strip.sort(key=cmp_to_key(ClosestPair.compare_y))
 
         for i in range(size):
             j = i+1
@@ -59,29 +59,48 @@ class ClosestPair:
         return min_value
 
     @staticmethod
-    def closest_util(p: list, n: int, points: Points):
+    def closest_util(px: list, py: list, n: int, points: Points):
         if n <= 3:
-            return ClosestPair.brute_force(p, n, points)
+            return ClosestPair.brute_force(px, n, points)
 
         mid = int(n/2)
-        mid_point = p[mid]
+        mid_point = px[mid]
 
-        dl = ClosestPair.closest_util(p, mid, points)
-        dr = ClosestPair.closest_util(p[mid:], n-mid, points)
+        pyl = []
+        pyr = []
+        li = 0
+        ri = 0
+        for i in range(n):
+            if py[i].get_x() <= mid_point.get_x():
+                pyl.append(py[i])
+                li += 1
+            else:
+                pyr.append(py[i])
+                ri += 1
+
+        dl = ClosestPair.closest_util(px, pyl, li, points)
+        dr = ClosestPair.closest_util(px[mid:], pyr, ri, points)
 
         d = min(dl, dr)
 
         strip = []
         for i in range(n):
-            if math.fabs(p[i].get_x() - mid_point.get_x()) < d:
-                strip.append(p[i])
+            if math.fabs(py[i].get_x() - mid_point.get_x()) < d:
+                strip.append(py[i])
 
         return min(d, ClosestPair.strip_closest(strip, len(strip), d, points))
 
     def get_closest_points(self):
         points = self.points
-        self.p.sort(key=cmp_to_key(ClosestPair.compare_x))
-        ClosestPair.closest_util(self.p, len(self.p), points)
+
+        px = copy.deepcopy(self.p)
+        py = copy.deepcopy(self.p)
+
+        px.sort(key=cmp_to_key(ClosestPair.compare_x))
+        py.sort(key=cmp_to_key(ClosestPair.compare_y))
+
+        ClosestPair.closest_util(px, py, len(px), points)
+
         return points.minDistance, points.point_1, points.point_2
 
 
