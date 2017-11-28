@@ -229,7 +229,7 @@ def point_in_polygon(p: Point, polygon: Polygon):
 
     for i in range(len(v)-1):
         if (v[i].get_y() <= p.get_y() and v[i+1].get_y() > p.get_y()) or \
-            (v[i].get_y() > p.get_y() and v[i+1].get_y() <= p.get_y()):
+           (v[i].get_y() > p.get_y() and v[i+1].get_y() <= p.get_y()):
 
             vt = (p.get_y() - v[i].get_y()) / float(v[i+1].get_y() - v[i].get_y())
             if p.get_x() < (v[i].get_x() + vt * (v[i+1].get_x() - v[i].get_x())):

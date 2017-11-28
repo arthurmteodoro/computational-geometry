@@ -54,6 +54,7 @@ class ClosestPair:
                 if distance_between_two_points(strip[i], strip[j]):
                     min_value = distance_between_two_points(strip[i], strip[j])
                     points.change(strip[i], strip[j])
+                j += 1
 
         return min_value
 

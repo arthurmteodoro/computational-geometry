@@ -6,6 +6,7 @@ from Representations.Point import Point as P
 
 # auxiliary classes
 
+
 class Point:
     x = 0.0
     y = 0.0

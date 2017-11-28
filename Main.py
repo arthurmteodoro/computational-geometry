@@ -186,6 +186,9 @@ class MainWindow:
                     self.liberaTodosBotoes()
                     self.pts.clear()
 
+    def onPressEscape(self, event):
+        pass
+
     def blockButtons(self, button: tk.Button):
         self.btnCirculo.configure(state=tk.DISABLED)
         self.btnLinha.configure(state=tk.DISABLED)
@@ -205,19 +208,21 @@ class MainWindow:
         self.w.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
     def calcular_fecho_convexo(self):
-        convex = ConvexHull(self.points)
-        hull = convex.calcule()
+        if len(self.points) >= 3:
+            convex = ConvexHull(self.points)
+            hull = convex.convex_hull()
 
-        n = len(hull)
-        for i in range(len(hull)):
-            self.w.create_line(hull[i].get_x(), hull[i].get_y(), hull[(i+1) % n].get_x(),
-                               hull[(i+1) % n].get_y(), fill='blue')
+            n = len(hull)
+            for i in range(len(hull)):
+                self.w.create_line(hull[i].get_x(), hull[i].get_y(), hull[(i+1) % n].get_x(),
+                                   hull[(i+1) % n].get_y(), fill='blue')
 
     def calcular_ponto_mais_proximo(self):
-        closest_point = ClosestPair(self.points)
+        if len(self.points) >= 2:
+            closest_point = ClosestPair(self.points)
 
-        res = closest_point.get_closest_points()
-        self.w.create_line(res[1].get_x(), res[1].get_y(), res[2].get_x(), res[2].get_y(), fill='green')
+            res = closest_point.get_closest_points()
+            self.w.create_line(res[1].get_x(), res[1].get_y(), res[2].get_x(), res[2].get_y(), fill='green', width=3)
 
     def calcular_voronoi(self):
         voronoi = Voronoi(self.points)
@@ -227,7 +232,7 @@ class MainWindow:
         for i in lines:
             p0 = i.get_a()
             p1 = i.get_b()
-            self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='blue')
+            self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='green2')
 
     def calcular_tringulacao(self):
         pts = copy.deepcopy(self.polygons[0].get_list_points())
@@ -235,7 +240,7 @@ class MainWindow:
         tri = []
         while len(plist) >= 3:
             ear = classics.get_ear(plist)
-            if ear == []:
+            if len(ear) == 0:
                 break
             tri.append(ear)
 
@@ -243,7 +248,6 @@ class MainWindow:
             self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y())
             self.w.create_line(p1.get_x(), p1.get_y(), p2.get_x(), p2.get_y())
             self.w.create_line(p2.get_x(), p2.get_y(), p0.get_x(), p0.get_y())
-
 
 
 if __name__ == '__main__':
