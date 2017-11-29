@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter.ttk import Combobox
+from tkinter import messagebox
 from Representations.Circle import Circle
 from Representations.Line import Line
 from Representations.LineSegment import LineSegment
@@ -9,6 +11,40 @@ from Problems.Complex_Problems.Voronoi import Voronoi
 from Problems.Complex_Problems.Closest_Pair_Points import ClosestPair
 from Problems.Complex_Problems.Convex_Hull import ConvexHull
 import copy
+
+
+class Box:
+    def __init__(self, root, msg, values):
+        self.value = None
+
+        self.root = root
+        self.top = tk.Toplevel(self.root)
+
+        self.frm = tk.Frame(self.top)
+        self.frm.pack(fill='both', expand=True)
+
+        self.label = tk.Label(self.frm, text=msg)
+        self.label.pack()
+
+        self.country_var = tk.StringVar()
+        self.combobox = Combobox(self.frm, textvariable=self.country_var)
+        self.combobox['values'] = values
+        self.combobox.pack(pady=25)
+
+        self.frmButton = tk.Frame(self.top)
+        self.frmButton.pack(side=tk.BOTTOM)
+
+        self.btnOk = tk.Button(self.frmButton, text="Selecionar", command=lambda: self.onClickOk())
+        self.btnOk.pack(side=tk.LEFT, padx=25)
+
+        self.btnCancel = tk.Button(self.frmButton, text="Cancelar", command=lambda: self.top.destroy())
+        self.btnCancel.pack(side=tk.LEFT, padx=25)
+
+    def onClickOk(self):
+        data = self.combobox.get()
+        if data:
+            self.value = data
+            self.top.destroy()
 
 
 class MainWindow:
@@ -27,8 +63,11 @@ class MainWindow:
         self.complexMenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Problemas Clássicos", menu=self.classicsMenu)
         self.menu.add_cascade(label="Problemas Complexos", menu=self.complexMenu)
-        self.classicsMenu.add_command(label="Calcular...", command=self.calcular)
+        self.classicsMenu.add_command(label="Distância entre dois pontos", command=self.calcular_distancia_dois_pontos)
+        self.classicsMenu.add_command(label="Área de um polígono", command=self.calcular_area_do_polygon)
+        self.classicsMenu.add_command(label="Área de um círculo", command=self.calcular_area_do_circulo)
         self.classicsMenu.add_command(label="Dobrar em Triangulos", command=self.calcular_tringulacao)
+        self.classicsMenu.add_command(label="Ponto dentro do polígono", command=self.ponto_dentro_poligono)
 
         self.complexMenu.add_command(label="Fecho Convexo", command=self.calcular_fecho_convexo)
         self.complexMenu.add_command(label="Par mais próximo", command=self.calcular_ponto_mais_proximo)
@@ -235,19 +274,129 @@ class MainWindow:
             self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='green2')
 
     def calcular_tringulacao(self):
-        pts = copy.deepcopy(self.polygons[0].get_list_points())
-        plist = pts[::-1] if classics.is_clockwise(self.polygons[0]) else pts[:]
-        tri = []
-        while len(plist) >= 3:
-            ear = classics.get_ear(plist)
-            if len(ear) == 0:
-                break
-            tri.append(ear)
+        strings = []
+        for i in range(len(self.polygons)):
+            strings.append("Poly"+str(i+1))
 
-        for p0, p1, p2 in tri:
-            self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y())
-            self.w.create_line(p1.get_x(), p1.get_y(), p2.get_x(), p2.get_y())
-            self.w.create_line(p2.get_x(), p2.get_y(), p0.get_x(), p0.get_y())
+        box = Box(self.master, "Selecione o polígono para realizar triangulação", strings)
+
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            escolhido = int(str_escolhido.split("Poly")[1])-1
+
+            pts = copy.deepcopy(self.polygons[escolhido].get_list_points())
+            plist = pts[::-1] if classics.is_clockwise(self.polygons[escolhido]) else pts[:]
+            tri = []
+            while len(plist) >= 3:
+                ear = classics.get_ear(plist)
+                if len(ear) == 0:
+                    break
+                tri.append(ear)
+
+            for p0, p1, p2 in tri:
+                self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y())
+                self.w.create_line(p1.get_x(), p1.get_y(), p2.get_x(), p2.get_y())
+                self.w.create_line(p2.get_x(), p2.get_y(), p0.get_x(), p0.get_y())
+
+    def calcular_distancia_dois_pontos(self):
+        strings = []
+        for i in range(len(self.points)):
+            strings.append("Ptn"+str(i+1))
+
+        box = Box(self.master, "Selecione o primeiro ponto", strings)
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            escolhido1 = int(str_escolhido.split("Ptn")[1]) - 1
+
+            box = Box(self.master, "Selecione o segundo ponto", strings)
+            self.master.wait_window(box.top)
+
+            str_escolhido = box.value
+            if str_escolhido is not None:
+                escolhido2 = int(str_escolhido.split("Ptn")[1]) - 1
+
+                distancia = classics.distance_between_two_points(self.points[escolhido1], self.points[escolhido2])
+                self.w.create_line(self.points[escolhido1].get_x(), self.points[escolhido1].get_y(),
+                                   self.points[escolhido2].get_x(), self.points[escolhido2].get_y())
+
+                text = "Distance="+str(format(distancia, '.2f'))
+
+                self.w.create_text((self.points[escolhido1].get_x()+self.points[escolhido2].get_x())/2,
+                                   (self.points[escolhido1].get_y()+self.points[escolhido2].get_y())/2, text=text)
+
+    def ponto_dentro_poligono(self):
+        strings = []
+        for i in range(len(self.polygons)):
+            strings.append("Poly" + str(i + 1))
+
+        box = Box(self.master, "Selecione o polígono para realizar triangulação", strings)
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            poly_escolhido = int(str_escolhido.split("Poly")[1]) - 1
+
+            strings = []
+            for i in range(len(self.points)):
+                strings.append("Ptn" + str(i + 1))
+
+            box = Box(self.master, "Selecione o primeiro ponto", strings)
+            self.master.wait_window(box.top)
+
+            str_escolhido = box.value
+            if str_escolhido is not None:
+                pto_escolhido = int(str_escolhido.split("Ptn")[1]) - 1
+
+                res = classics.point_in_polygon(self.points[pto_escolhido], self.polygons[poly_escolhido])
+
+                if res:
+                    tk.messagebox.showinfo("Ponto dentro do polígono", "O ponto está dentro do polígono")
+                else:
+                    tk.messagebox.showinfo("Ponto dentro do polígono", "O ponto não está dentro do polígono")
+
+    def calcular_area_do_circulo(self):
+        strings = []
+        for i in range(len(self.circles)):
+            strings.append("Circ" + str(i + 1))
+
+        box = Box(self.master, "Selecione o círculo", strings)
+        self.master.wait_window(box.top)
+
+        if box.value is not None:
+            circ_escolhido = self.circles[int(box.value.split("Circ")[1])-1]
+
+            area = classics.area_of_a_circle(circ_escolhido)
+            text = "Area=" + str(format(area, '.2f'))
+
+            self.draw_circle(circ_escolhido.get_centre().get_x(), circ_escolhido.get_centre().get_y(),
+                             circ_escolhido.get_radius(), fill='grey')
+            self.w.create_text(circ_escolhido.get_centre().get_x(),
+                               circ_escolhido.get_centre().get_y()-circ_escolhido.get_radius()-10, text=text)
+
+    def calcular_area_do_polygon(self):
+        strings = []
+        for i in range(len(self.polygons)):
+            strings.append("Poly" + str(i + 1))
+
+        box = Box(self.master, "Selecione o polígono", strings)
+        self.master.wait_window(box.top)
+
+        if box.value is not None:
+            poly_escolhido = self.polygons[int(box.value.split("Poly")[1]) - 1]
+
+            area = classics.polygon_area(poly_escolhido)
+            text = "Area=" + str(format(area, '.2f'))
+
+            pts = []
+            for i in poly_escolhido.get_list_points():
+                pts.append((i.get_x(), i.get_y()))
+
+            self.w.create_polygon(pts, fill='grey')
+            self.w.create_text(pts[0][0], pts[0][1]-30, text=text)
 
 
 if __name__ == '__main__':

@@ -46,8 +46,6 @@ class ClosestPair:
     def strip_closest(strip: list, size: int, d: float, points: Points):
         min_value = d
 
-        # strip.sort(key=cmp_to_key(ClosestPair.compare_y))
-
         for i in range(size):
             j = i+1
             while j < size and (strip[j].get_y() - strip[i].get_y()) < min_value:
