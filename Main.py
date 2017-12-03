@@ -66,8 +66,14 @@ class MainWindow:
         self.classicsMenu.add_command(label="Distância entre dois pontos", command=self.calcular_distancia_dois_pontos)
         self.classicsMenu.add_command(label="Área de um polígono", command=self.calcular_area_do_polygon)
         self.classicsMenu.add_command(label="Área de um círculo", command=self.calcular_area_do_circulo)
+        self.classicsMenu.add_command(label="Interseção de Segmentos", command=self.calcular_intersecao_segmentos)
+        self.classicsMenu.add_command(label="Orientação", command=self.calcular_orientacao)
+        self.classicsMenu.add_command(label="Convexidade", command=self.calcular_convexidade)
+        self.classicsMenu.add_command(label="Lado do círculo", command=self.calcular_lado_circulo)
         self.classicsMenu.add_command(label="Dobrar em Triangulos", command=self.calcular_tringulacao)
         self.classicsMenu.add_command(label="Ponto dentro do polígono", command=self.ponto_dentro_poligono)
+        self.classicsMenu.add_command(label="Distância entre um ponto e uma reta",
+                                      command=self.calcular_distancia_reta_ponto)
 
         self.complexMenu.add_command(label="Fecho Convexo", command=self.calcular_fecho_convexo)
         self.complexMenu.add_command(label="Par mais próximo", command=self.calcular_ponto_mais_proximo)
@@ -145,7 +151,23 @@ class MainWindow:
                     self.LOCK = True
                     self.pts.clear()
             elif self.btnLinha['state'] == tk.NORMAL:
-                pass
+                if len(self.pts) == 2:
+                    p1 = Point(self.pts[0][0], self.pts[0][1])
+                    p2 = Point(self.pts[1][0], self.pts[1][1])
+
+                    line = Line.generate_by_two_points(p1, p2)
+                    self.lines.append(line)
+
+                    p1_x_canvas = line.get_x_from_y(0)
+                    p2_x_canvas = line.get_x_from_y(500)
+
+                    self.w.create_line(int(p1_x_canvas), 0, int(p2_x_canvas), 500, fill="RoyalBlue2")
+                    nome = "Lin" + str(len(self.lines))
+                    self.w.create_text((p1_x_canvas + p2_x_canvas) / 2, (0 + 500) / 2, text=nome)
+
+                    self.liberaTodosBotoes()
+                    self.LOCK = True
+                    self.pts.clear()
             elif self.btnSegmento['state'] == tk.NORMAL:
                 if len(self.pts) == 2:
                     p1 = Point(self.pts[0][0], self.pts[0][1])
@@ -397,6 +419,148 @@ class MainWindow:
 
             self.w.create_polygon(pts, fill='grey')
             self.w.create_text(pts[0][0], pts[0][1]-30, text=text)
+
+    def calcular_intersecao_segmentos(self):
+        strings = []
+        for i in range(len(self.segments)):
+            strings.append("Seg" + str(i + 1))
+
+        box = Box(self.master, "Selecione o primeiro segmento", strings)
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            seg1_escolhido = int(str_escolhido.split("Seg")[1]) - 1
+
+            strings = []
+            for i in range(len(self.segments)):
+                strings.append("Seg" + str(i + 1))
+
+            box = Box(self.master, "Selecione o segundo segmento", strings)
+            self.master.wait_window(box.top)
+
+            str_escolhido = box.value
+            if str_escolhido is not None:
+                seg2_escolhido = int(str_escolhido.split("Seg")[1]) - 1
+
+                res = classics.intersection_two_lines_segments(self.segments[seg1_escolhido],
+                                                               self.segments[seg2_escolhido])
+
+                if res:
+                    tk.messagebox.showinfo("Interseção de segmentos", "Possui uma interseção entre os dois segmentos")
+                else:
+                    tk.messagebox.showinfo("Interseção de segmentos", "Não possui uma interseção entre os dois segmentos")
+
+    def calcular_lado_circulo(self):
+        strings = []
+        for i in range(len(self.circles)):
+            strings.append("Circ" + str(i + 1))
+
+        box = Box(self.master, "Selecione o círculo", strings)
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            circ_escolhido = int(str_escolhido.split("Circ")[1]) - 1
+
+            strings = []
+            for i in range(len(self.points)):
+                strings.append("Ptn" + str(i + 1))
+
+            box = Box(self.master, "Selecione o ponto", strings)
+            self.master.wait_window(box.top)
+
+            str_escolhido = box.value
+            if str_escolhido is not None:
+                ptn_escolhido = int(str_escolhido.split("Ptn")[1]) - 1
+
+                res = classics.side_of_circle(self.circles[circ_escolhido], self.points[ptn_escolhido])
+
+                if res == 1:
+                    tk.messagebox.showinfo("Lado do círculo", "O ponto está dentro do círculo")
+                elif res == 0:
+                    tk.messagebox.showinfo("Lado do círculo", "O ponto está no raio do círculo")
+                else:
+                    tk.messagebox.showinfo("Lado do círculo", "O ponto está fora do círculo")
+
+    def calcular_orientacao(self):
+        strings = []
+        for i in range(len(self.points)):
+            strings.append("Ptn" + str(i + 1))
+
+        box = Box(self.master, "Selecione o primeiro ponto", strings)
+        self.master.wait_window(box.top)
+
+        str_escolhido = box.value
+        if str_escolhido is not None:
+            ptn1 = int(str_escolhido.split("Ptn")[1]) - 1
+
+            box = Box(self.master, "Selecione o segundo ponto", strings)
+            self.master.wait_window(box.top)
+
+            str_escolhido = box.value
+            if str_escolhido is not None:
+                ptn2 = int(str_escolhido.split("Ptn")[1]) - 1
+
+                box = Box(self.master, "Selecione o terceiro ponto", strings)
+                self.master.wait_window(box.top)
+
+                str_escolhido = box.value
+
+                if str_escolhido is not None:
+                    ptn3 = int(str_escolhido.split("Ptn")[1]) - 1
+
+                    res = classics.orient_2d(self.points[ptn1], self.points[ptn2], self.points[ptn3])
+
+                    if res == -1:
+                        tk.messagebox.showinfo("Orientação", "Os pontos estão em sentido horário")
+                    elif res == 0:
+                        tk.messagebox.showinfo("Orientação", "Os pontos são colineares")
+                    else:
+                        tk.messagebox.showinfo("Orientação", "Os pontos estão em sentido anti-horário")
+
+    def calcular_convexidade(self):
+        strings = []
+        for i in range(len(self.polygons)):
+            strings.append("Poly" + str(i + 1))
+
+        box = Box(self.master, "Selecione o polígono", strings)
+        self.master.wait_window(box.top)
+
+        if box.value is not None:
+            poly_escolhido = self.polygons[int(box.value.split("Poly")[1]) - 1]
+
+            value = classics.convex_polygon(poly_escolhido)
+
+            if value:
+                tk.messagebox.showinfo("Convexidade", "O polígono é convexo")
+            else:
+                tk.messagebox.showinfo("Convexidade", "O polígono não é convexo")
+
+    def calcular_distancia_reta_ponto(self):
+        strings = []
+        for i in range(len(self.lines)):
+            strings.append("Lin"+str(i+1))
+
+        box = Box(self.master, "Selecione a linha", strings)
+        self.master.wait_window(box.top)
+
+        if box.value is not None:
+            line_escolhido = self.lines[int(box.value.split("Lin")[1]) -1]
+
+            strings = []
+            for i in range(len(self.points)):
+                strings.append("Ptn"+str(i+1))
+
+            box = Box(self.master, "Selecione o ponto", strings)
+            self.master.wait_window(box.top)
+
+            if box.value is not None:
+                ptn_escolhido = self.points[int(box.value.split("Ptn")[1]) -1]
+
+                value = classics.distance_between_one_line_and_one_point(ptn_escolhido, line_escolhido)
+
+                tk.messagebox.showinfo("Distância entre um ponto e reta", "A distância é "+str(value))
 
 
 if __name__ == '__main__':

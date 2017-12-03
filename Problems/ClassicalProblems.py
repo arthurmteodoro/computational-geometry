@@ -120,6 +120,16 @@ def side_of_circle(a: Point, b: Point, c: Point, d: Point):
         return 0
 
 
+def side_of_circle(c: Circle, p: Point):
+    distance = distance_between_two_points(c.get_centre(), p)
+    if distance < c.get_radius():
+        return 1
+    elif distance == c.get_radius():
+        return 0
+    else:
+        return -1
+
+
 def __nearest_distance(seg: LineSegment, p: Point):
     a = p.get_x() - seg.get_a().get_x()
     b = p.get_y() - seg.get_a().get_y()
@@ -148,11 +158,11 @@ def __nearest_distance(seg: LineSegment, p: Point):
     return math.sqrt(dx ** 2 + dy ** 2)
 
 
-def closest_point(seg: LineSegment, points: Set):
+def closest_point(seg: LineSegment, points: list):
     distance = math.inf
     point = None
 
-    for i in points.get_iterator():
+    for i in points:
         value = __nearest_distance(seg, i)
         if value < distance:
             distance = value
