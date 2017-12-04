@@ -10,6 +10,10 @@ class P0:
 
 
 class ConvexHull:
+    """
+    Get a smallest convex polygon that contains all points
+    Algorithm based by http://www.geeksforgeeks.org/convex-hull-set-2-graham-scan/
+    """
     def __init__(self, points):
         self.pts = points
         self.p0 = P0()

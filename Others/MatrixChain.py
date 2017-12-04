@@ -1,5 +1,7 @@
 import sys
 
+# algorithm for http://www.geeksforgeeks.org/printing-brackets-matrix-chain-multiplication-problem/
+# algorithm for print best parenthesis in matrix multiplication
 
 class HoldName:
     def __init__(self, name):

@@ -19,11 +19,22 @@ def distance_between_two_points(pa: Point, pb: Point):
 
 
 def distance_between_one_line_and_one_point(p: Point, l: Line):
+    """
+    Get a distance between one line and one point
+    :param p: one point
+    :param l: one line
+    :return: distance between p and l
+    """
     return (math.fabs(l.get_a() * p.get_x() + l.get_a() * p.get_y() + l.get_c())) / \
            math.sqrt(pow(l.get_a(), 2) + pow(l.get_b(), 2))
 
 
 def area_of_a_circle(c: Circle):
+    """
+    Area for circle
+    :param c: a circle
+    :return: area
+    """
     return math.pi * pow(c.get_radius(), 2)
 
 
@@ -52,6 +63,12 @@ def polygon_sort(poly: Polygon):
 
 
 def polygon_area(poly: Polygon):
+    """
+    Polygon area using Shoelace formula.
+    Algorithm based http://www.geeksforgeeks.org/area-of-a-polygon-with-given-n-ordered-vertices/
+    :param poly: one polygon
+    :return: area for polygon
+    """
     corners = polygon_sort(poly)
     n = len(corners)
     area = 0.0
@@ -159,6 +176,13 @@ def __nearest_distance(seg: LineSegment, p: Point):
 
 
 def closest_point(seg: LineSegment, points: list):
+    """
+    Algorithm for get closest point between a line segment
+    Algorithm based in https://goo.gl/PkLqhe
+    :param seg: one line segment
+    :param points: a list of points
+    :return: a point more closest
+    """
     distance = math.inf
     point = None
 
@@ -172,6 +196,14 @@ def closest_point(seg: LineSegment, points: list):
 
 
 def orient_2d(a: Point, b: Point, c: Point):
+    """
+    Orientation of tree points
+    Algorithm based in http://www.geeksforgeeks.org/orientation-3-ordered-points/
+    :param a: point 1
+    :param b: point 2
+    :param c: point 3
+    :return: orientation
+    """
     first = (b.get_y() - a.get_y()) * (c.get_x() - b.get_x())
     second = (c.get_y() - b.get_y()) * (b.get_x() - a.get_x())
     det = first - second
@@ -212,6 +244,13 @@ def __points_orientation(p: Point, q: Point, r: Point):
 
 
 def intersection_two_lines_segments(seg1: LineSegment, seg2: LineSegment):
+    """
+    Check that two line segments meet
+    Algorithm based in http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+    :param seg1: segment one
+    :param seg2: segment two
+    :return: if exist intersection or not
+    """
     o1 = __points_orientation(seg1.get_a(), seg1.get_b(), seg2.get_a())
     o2 = __points_orientation(seg1.get_a(), seg1.get_b(), seg2.get_b())
     o3 = __points_orientation(seg2.get_a(), seg2.get_b(), seg1.get_a())
@@ -281,6 +320,12 @@ def is_clockwise(poly: Polygon):
 
 
 def get_ear(poly: list):
+    """
+    Ear Clipping Triangulation
+    Algorithm based https://github.com/mrbaozi/triangulation
+    :param poly: list of polygon points
+    :return: a ear
+    """
     size = len(poly)
 
     if size < 3:

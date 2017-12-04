@@ -64,19 +64,21 @@ class MainWindow:
         self.menu.add_cascade(label="Problemas Clássicos", menu=self.classicsMenu)
         self.menu.add_cascade(label="Problemas Complexos", menu=self.complexMenu)
         self.classicsMenu.add_command(label="Distância entre dois pontos", command=self.calcular_distancia_dois_pontos)
-        self.classicsMenu.add_command(label="Área de um polígono", command=self.calcular_area_do_polygon)
-        self.classicsMenu.add_command(label="Área de um círculo", command=self.calcular_area_do_circulo)
-        self.classicsMenu.add_command(label="Interseção de Segmentos", command=self.calcular_intersecao_segmentos)
-        self.classicsMenu.add_command(label="Orientação", command=self.calcular_orientacao)
-        self.classicsMenu.add_command(label="Convexidade", command=self.calcular_convexidade)
-        self.classicsMenu.add_command(label="Lado do círculo", command=self.calcular_lado_circulo)
-        self.classicsMenu.add_command(label="Dobrar em Triangulos", command=self.calcular_tringulacao)
-        self.classicsMenu.add_command(label="Ponto dentro do polígono", command=self.ponto_dentro_poligono)
         self.classicsMenu.add_command(label="Distância entre um ponto e uma reta",
                                       command=self.calcular_distancia_reta_ponto)
+        self.classicsMenu.add_command(label="Área de um polígono", command=self.calcular_area_do_polygon)
+        self.classicsMenu.add_command(label="Área de um círculo", command=self.calcular_area_do_circulo)
+        self.classicsMenu.add_command(label="Convexidade de um polígono", command=self.calcular_convexidade)
+        self.classicsMenu.add_command(label="Dobrar em Triangulos", command=self.calcular_tringulacao)
+        self.classicsMenu.add_command(label="Orientação 2D", command=self.calcular_orientacao)
+        self.classicsMenu.add_command(label="Lado do círculo", command=self.calcular_lado_circulo)
+        self.classicsMenu.add_command(label="Interseção de Segmentos", command=self.calcular_intersecao_segmentos)
+        self.classicsMenu.add_command(label="Ponto mais próximo do segmento",
+                                      command=self.calcular_ponto_mais_proximo_segmento)
+        self.classicsMenu.add_command(label="Ponto dentro do polígono", command=self.ponto_dentro_poligono)
 
-        self.complexMenu.add_command(label="Fecho Convexo", command=self.calcular_fecho_convexo)
         self.complexMenu.add_command(label="Par mais próximo", command=self.calcular_ponto_mais_proximo)
+        self.complexMenu.add_command(label="Fecho Convexo", command=self.calcular_fecho_convexo)
         self.complexMenu.add_command(label="Voronoi", command=self.calcular_voronoi)
 
         self.frmMain = tk.Frame(self.master)
@@ -286,14 +288,15 @@ class MainWindow:
             self.w.create_line(res[1].get_x(), res[1].get_y(), res[2].get_x(), res[2].get_y(), fill='green', width=3)
 
     def calcular_voronoi(self):
-        voronoi = Voronoi(self.points)
-        voronoi.process()
-        lines = voronoi.get_output()
+        if len(self.points) > 0:
+            voronoi = Voronoi(self.points)
+            voronoi.process()
+            lines = voronoi.get_output()
 
-        for i in lines:
-            p0 = i.get_a()
-            p1 = i.get_b()
-            self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='green2')
+            for i in lines:
+                p0 = i.get_a()
+                p1 = i.get_b()
+                self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='green2')
 
     def calcular_tringulacao(self):
         strings = []
@@ -528,14 +531,14 @@ class MainWindow:
         self.master.wait_window(box.top)
 
         if box.value is not None:
-            poly_escolhido = self.polygons[int(box.value.split("Poly")[1]) - 1]
+            poly_escolhido = copy.deepcopy(self.polygons[int(box.value.split("Poly")[1]) - 1])
 
             value = classics.convex_polygon(poly_escolhido)
 
             if value:
                 tk.messagebox.showinfo("Convexidade", "O polígono é convexo")
             else:
-                tk.messagebox.showinfo("Convexidade", "O polígono não é convexo")
+                tk.messagebox.showinfo("Convexidade", "O polígono é côncavo")
 
     def calcular_distancia_reta_ponto(self):
         strings = []
@@ -561,6 +564,22 @@ class MainWindow:
                 value = classics.distance_between_one_line_and_one_point(ptn_escolhido, line_escolhido)
 
                 tk.messagebox.showinfo("Distância entre um ponto e reta", "A distância é "+str(value))
+
+    def calcular_ponto_mais_proximo_segmento(self):
+        strings = []
+        for i in range(len(self.segments)):
+            strings.append("Seg"+str(i+1))
+
+        box = Box(self.master, "Selecione o segmento de reta", strings)
+        self.master.wait_window(box.top)
+
+        if box.value is not None and len(self.points) > 0:
+            seg_escolhido = self.segments[int(box.value.split("Seg")[1]) - 1]
+
+            value = classics.closest_point(seg_escolhido, self.points)
+
+            self.w.create_oval(value.get_x()-self.RADIUS-1, value.get_y()-self.RADIUS-1, value.get_x()+self.RADIUS+1,
+                               value.get_y()+self.RADIUS+1, fill="red")
 
 
 if __name__ == '__main__':
