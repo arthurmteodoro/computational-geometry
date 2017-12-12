@@ -7,6 +7,7 @@ class Polygon:
     def __init__(self):
         self.__segments = Set()
         self.__list_points = []
+        self.__list_tuple = []
 
     def add_segment(self, segment: LineSegment):
         self.__segments.insert(segment)
@@ -21,8 +22,10 @@ class Polygon:
 
         if not exist_in_list_a:
             self.__list_points.append(segment.get_a())
+            self.__list_tuple.append((segment.get_a().get_x(), segment.get_a().get_y()))
         if not exist_in_list_b:
             self.__list_points.append(segment.get_b())
+            self.__list_tuple.append((segment.get_b().get_x(), segment.get_b().get_y()))
 
     def get_num_segments(self):
         return len(self.__segments)
@@ -44,6 +47,9 @@ class Polygon:
             if i.get_x() == p.get_x() and i.get_y() == p.get_y():
                 self.__list_points.remove(i)
                 break
+
+    def get_list(self):
+        return self.__list_tuple
 
 
 if __name__ == '__main__':

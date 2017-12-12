@@ -9,7 +9,7 @@ from Representations.Polygon import Polygon
 import Problems.ClassicalProblems as classics
 from Problems.Complex_Problems.Voronoi import Voronoi
 from Problems.Complex_Problems.Closest_Pair_Points import ClosestPair
-from Problems.Complex_Problems.Convex_Hull import ConvexHull
+from Problems.Complex_Problems.Smallest_Circle import make_circle
 import copy
 
 
@@ -78,7 +78,7 @@ class MainWindow:
         self.classicsMenu.add_command(label="Ponto dentro do polígono", command=self.ponto_dentro_poligono)
 
         self.complexMenu.add_command(label="Par mais próximo", command=self.calcular_ponto_mais_proximo)
-        self.complexMenu.add_command(label="Fecho Convexo", command=self.calcular_fecho_convexo)
+        self.complexMenu.add_command(label="Circulo Mínimo", command=self.calcular_circulo_minino)
         self.complexMenu.add_command(label="Voronoi", command=self.calcular_voronoi)
 
         self.frmMain = tk.Frame(self.master)
@@ -270,16 +270,6 @@ class MainWindow:
     def draw_circle(self, x, y, r, **kwargs):
         self.w.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
-    def calcular_fecho_convexo(self):
-        if len(self.points) >= 3:
-            convex = ConvexHull(self.points)
-            hull = convex.convex_hull()
-
-            n = len(hull)
-            for i in range(len(hull)):
-                self.w.create_line(hull[i].get_x(), hull[i].get_y(), hull[(i+1) % n].get_x(),
-                                   hull[(i+1) % n].get_y(), fill='blue')
-
     def calcular_ponto_mais_proximo(self):
         if len(self.points) >= 2:
             closest_point = ClosestPair(self.points)
@@ -298,6 +288,11 @@ class MainWindow:
                 p1 = i.get_b()
                 self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), fill='green2')
 
+    def calcular_circulo_minino(self):
+        if len(self.points) > 0:
+            circle = make_circle(self.points)
+            self.draw_circle(circle.get_centre().get_x(), circle.get_centre().get_y(), circle.get_radius())
+
     def calcular_tringulacao(self):
         strings = []
         for i in range(len(self.polygons)):
@@ -311,19 +306,17 @@ class MainWindow:
         if str_escolhido is not None:
             escolhido = int(str_escolhido.split("Poly")[1])-1
 
-            pts = copy.deepcopy(self.polygons[escolhido].get_list_points())
-            plist = pts[::-1] if classics.is_clockwise(self.polygons[escolhido]) else pts[:]
-            tri = []
-            while len(plist) >= 3:
-                ear = classics.get_ear(plist)
-                if len(ear) == 0:
-                    break
-                tri.append(ear)
+            polygon = copy.deepcopy(self.polygons[escolhido])
 
-            for p0, p1, p2 in tri:
-                self.w.create_line(p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y())
-                self.w.create_line(p1.get_x(), p1.get_y(), p2.get_x(), p2.get_y())
-                self.w.create_line(p2.get_x(), p2.get_y(), p0.get_x(), p0.get_y())
+            ears = classics.EarClipping.ears_finding(polygon.get_list())
+            edges = classics.EarClipping.ears_clipping(polygon.get_list(), ears)
+
+            if len(edges) > 0:
+                for edge in edges:
+                    self.w.create_line(edge.get_a().get_x(), edge.get_a().get_y(), edge.get_b().get_x(), edge.get_b().get_y())
+            else:
+                tk.messagebox.showinfo("Dobra", "Não é possivel realizar dobras sobre este poligono")
+
 
     def calcular_distancia_dois_pontos(self):
         strings = []
