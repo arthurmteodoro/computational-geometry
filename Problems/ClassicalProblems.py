@@ -256,6 +256,10 @@ def point_in_polygon(p: Point, polygon: Polygon):
 
 
 class EarClipping:
+    """
+    Class for calculate ear clipping
+    Based in https://github.com/hmpbmp/Triangulation
+    """
     def __init__(self, polygon: Polygon):
         self.points = polygon.get_list_points()
 

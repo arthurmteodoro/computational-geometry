@@ -70,11 +70,11 @@ class PriorityQueue:
         self.counter = itertools.count()
 
     def push(self, item):
-        # check for duplicate
+        # check duplicatas
         if item in self.entry_finder:
             return
         count = next(self.counter)
-        # use x-coordinate as a primary key (heapq in python is min-heap)
+        # use a coordenada x como uma chave primária (heapq em python é min-heap)
         entry = [item.x, count, item]
         self.entry_finder[item] = entry
         heapq.heappush(self.pq, entry)
@@ -109,23 +109,23 @@ class PriorityQueue:
 
 class Voronoi:
     def __init__(self, points):
-        self.output = []  # list of line segment
-        self.arc = None  # binary tree for parabola arcs
+        self.output = []  # lista de segmentos de reta
+        self.arc = None  # arvore para os arcos das parabolas
 
-        self.points = PriorityQueue()  # site events
-        self.event = PriorityQueue()  # circle events
+        self.points = PriorityQueue()  # eventos de ponto
+        self.event = PriorityQueue()  # eventos de circulo
 
-        # bounding box
+        # limite da caixa do voronoi
         self.x0 = -50.0
         self.x1 = -50.0
         self.y0 = 550.0
         self.y1 = 550.0
 
-        # insert points to site event
+        # insere os pontos no evento de pontos
         for pts in points:
             point = Point(pts.get_x(), pts.get_y())
             self.points.push(point)
-            # keep track of bounding box size
+            # manter a caixa do tamanho certo
             if point.x < self.x0:
                 self.x0 = point.x
             if point.y < self.y0:
@@ -135,7 +135,7 @@ class Voronoi:
             if point.y > self.y1:
                 self.y1 = point.y
 
-        # add margins to the bounding box
+        # adicionar margens à caixa
         dx = (self.x1 - self.x0 + 1) / 5.0
         dy = (self.y1 - self.y0 + 1) / 5.0
         self.x0 = self.x0 - dx
@@ -150,28 +150,28 @@ class Voronoi:
             else:
                 self.process_point()  # handle site event
 
-        # after all points, process remaining circle events
+        # apos todos os pontos, processar os eventos de circulo restantes
         while not self.event.empty():
             self.process_event()
 
         self.finish_edges()
 
     def process_point(self):
-        # get next event from site pq
+        # pega o proximo evento de ponto da lista
         p = self.points.pop()
-        # add new arc (parabola)
+        # adiciona novo arco
         self.arc_insert(p)
 
     def process_event(self):
-        # get next event from circle pq
+        # pega novo evento de circulo
         e = self.event.pop()
 
         if e.valid:
-            # start new edge
+            # cria um novo segmento
             s = Segment(e.p)
             self.output.append(s)
 
-            # remove associated arc (parabola)
+            # faz a remoção da parabola associada
             a = e.a
             if a.p_prev is not None:
                 a.p_prev.p_next = a.p_next
@@ -180,13 +180,13 @@ class Voronoi:
                 a.p_next.p_prev = a.p_prev
                 a.p_next.s0 = s
 
-            # finish the edges before and after a
+            # finaliza o segmento antes de depois de a
             if a.s0 is not None:
                 a.s0.finish(e.p)
             if a.s1 is not None:
                 a.s1.finish(e.p)
 
-            # recheck circle events on either side of p
+            # verifica novamente os eventos de circulo do lado de p
             if a.p_prev is not None:
                 self.check_circle_event(a.p_prev, e.x)
             if a.p_next is not None:
@@ -196,12 +196,12 @@ class Voronoi:
         if self.arc is None:
             self.arc = Arc(p)
         else:
-            # find the current arcs at p.y
+            # pega os arcos correntes em p.y
             i = self.arc
             while i is not None:
                 flag, z = self.intersect(p, i)
                 if flag:
-                    # new parabola intersects arc i
+                    # nova intersecao de arcos i
                     flag, zz = self.intersect(p, i.p_next)
                     if (i.p_next is not None) and (not flag):
                         i.p_next.p_prev = Arc(i.p, i, i.p_next)
@@ -210,13 +210,13 @@ class Voronoi:
                         i.p_next = Arc(i.p, i)
                     i.p_next.s1 = i.s1
 
-                    # add p between i and i.p_next
+                    # adiciona p entre i e i.p_next
                     i.p_next.p_prev = Arc(p, i, i.p_next)
                     i.p_next = i.p_next.p_prev
 
-                    i = i.p_next  # now i points to the new arc
+                    i = i.p_next  # agora ponto i tem um novo arco
 
-                    # add new half-edges connected to i's endpoints
+                    # adiciona metada de um segmento aos pontos finais i
                     seg = Segment(z)
                     self.output.append(seg)
                     i.p_prev.s1 = i.s0 = seg
@@ -225,7 +225,7 @@ class Voronoi:
                     self.output.append(seg)
                     i.p_next.s0 = i.s1 = seg
 
-                    # check for new circle events around the new arc
+                    # verifica para o novo evento de circulo novos arcos
                     self.check_circle_event(i, p.x)
                     self.check_circle_event(i.p_prev, p.x)
                     self.check_circle_event(i.p_next, p.x)
@@ -234,13 +234,13 @@ class Voronoi:
 
                 i = i.p_next
 
-            # if p never intersects an arc, append it to the list
+            # se p nunca intersepta um arco, adiciona na lista
             i = self.arc
             while i.p_next is not None:
                 i = i.p_next
             i.p_next = Arc(p, i)
 
-            # insert new segment between p and i
+            # adiciona o novo segmento entre p e i
             x = self.x0
             y = (i.p_next.p.y + i.p.y) / 2.0
             start = Point(x, y)
@@ -250,7 +250,7 @@ class Voronoi:
             self.output.append(seg)
 
     def check_circle_event(self, i, x0):
-        # look for a new circle event for arc i
+        # olha para o novo evento de circulo para o arco i
         if (i.e is not None) and (i.e.x != self.x0):
             i.e.valid = False
         i.e = None
@@ -263,10 +263,9 @@ class Voronoi:
             self.event.push(i.e)
 
     def circle(self, a, b, c):
-        # check if bc is a "right turn" from ab
+        # olha se bc é uma curva a direita de ab
         if ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) > 0: return False, None, None
 
-        # Joseph O'Rourke, Computational Geometry in C (2nd ed.) p.189
         A = b.x - a.x
         B = b.y - a.y
         C = c.x - a.x
@@ -275,20 +274,20 @@ class Voronoi:
         F = C * (a.x + c.x) + D * (a.y + c.y)
         G = 2 * (A * (c.y - b.y) - B * (c.x - b.x))
 
-        if G == 0: return False, None, None  # Points are co-linear
+        if G == 0: return False, None, None  # pontos sao colineares
 
-        # point o is the center of the circle
+        # ponto o e o centro do circulo
         ox = 1.0 * (D * E - B * F) / G
         oy = 1.0 * (A * F - C * E) / G
 
-        # o.x plus radius equals max x coord
+        # o.x mais raio e igual a maior coordenada x
         x = ox + math.sqrt((a.x - ox) ** 2 + (a.y - oy) ** 2)
         o = Point(ox, oy)
 
         return True, x, o
 
     def intersect(self, p, i):
-        # check whether a new parabola at point p intersect with arc i
+        # verifica se uma nova parabola no ponto p se cruza com arco i
         if i is None:
             return False, None
         if i.p.x == p.x: return False, None
@@ -309,7 +308,7 @@ class Voronoi:
         return False, None
 
     def intersection(self, p0, p1, l):
-        # get the intersection of two parabolas
+        # pega a intersecao de duas parabolas
         p = p0
         if p0.x == p1.x:
             py = (p0.y + p1.y) / 2.0
@@ -319,7 +318,7 @@ class Voronoi:
             py = p0.y
             p = p1
         else:
-            # use quadratic formula
+            # usa formula quadratica
             z0 = 2.0 * (p0.x - l)
             z1 = 2.0 * (p1.x - l)
 
@@ -341,14 +340,6 @@ class Voronoi:
                 p = self.intersection(i.p, i.p_next.p, l * 2.0)
                 i.s1.finish(p)
             i = i.p_next
-
-    def print_output(self):
-        it = 0
-        for o in self.output:
-            it = it + 1
-            p0 = o.start
-            p1 = o.end
-            print(p0.x, p0.y, p1.x, p1.y)
 
     def get_output(self):
         res = []

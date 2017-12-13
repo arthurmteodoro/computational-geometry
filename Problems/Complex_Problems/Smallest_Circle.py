@@ -12,21 +12,20 @@ def make_circle(points: list):
     shuffled = copy.deepcopy(points)
     random.shuffle(shuffled)
 
-    # Progressively add points to circle or recompute circle
+    # Adicionar progressivamente os pontos no circulo ou recalculá-lo
     c = None
     for (i, p) in enumerate(shuffled):
-        # if c is None or p not in circle c:
+        # side of circle: 1 = dentro, 0 = no raio, -1 fora
         if c is None or classics.side_of_circle(c, p) == -1:
             c = _make_circle_one_point(shuffled[: i + 1], p)
     return c
 
 
-# One boundary point known
+# Um ponto de fronteira conhecidos
 def _make_circle_one_point(points: list, p: Point):
-    # c = (p[0], p[1], 0.0)
     c = Circle(p, 0)
     for (i, q) in enumerate(points):
-        # if not is_in_circle(c, q):
+        # side of circle: 1 = dentro, 0 = no raio, -1 fora
         if classics.side_of_circle(c, q) == -1:
             if c.get_radius() == 0.0:
                 c = make_diameter(p, q)
@@ -35,7 +34,7 @@ def _make_circle_one_point(points: list, p: Point):
     return c
 
 
-# Two boundary points known
+# Dois pontos de fronteira conhecido
 def _make_circle_two_points(points: list, p: Point, q: Point):
     circ = make_diameter(p, q)
     left = None
@@ -45,12 +44,12 @@ def _make_circle_two_points(points: list, p: Point, q: Point):
     qx = q.get_x()
     qy = q.get_y()
 
-    # For each point not in the two-point circle
+    # para cada ponto que nao está no circulo
     for r in points:
         if classics.side_of_circle(circ, r) >= 0:
             continue
 
-        # Form a circumcircle and classify it on left or right side
+        # Formar uma circunferência e classificá-la no lado esquerdo ou direito
         cross = _cross_product(px, py, qx, qy, r.get_x(), r.get_y())
         c = make_circumcircle(p, q, r)
         if c is None:
@@ -64,7 +63,7 @@ def _make_circle_two_points(points: list, p: Point, q: Point):
                 _cross_product(px, py, qx, qy, right.get_centre().get_x(), right.get_centre().get_y())):
             right = c
 
-    # Select which circle to return
+    # selecionar qual circulo vai retornar
     if left is None and right is None:
         return circ
     elif left is None:
@@ -109,7 +108,7 @@ def make_diameter(p0: Point, p1: Point):
     return Circle(Point(cx, cy), max(r0, r1))
 
 
-# Returns twice the signed area of the triangle defined by (x0, y0), (x1, y1), (x2, y2).
+# Retorna duas vezes a área assinada do triângulo definido por (x0, y0), (x1, y1), (x2, y2).
 def _cross_product(x0, y0, x1, y1, x2, y2):
     return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0)
 
